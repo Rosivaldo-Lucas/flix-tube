@@ -26,6 +26,9 @@ public class Video {
     @Column(name = "input_file_path")
     private String inputFilePath;
 
+    @Column(name = "input_filename")
+    private String inputFilename;
+
     @Column(name = "output_file_path")
     private String outputFilePath;
 
@@ -40,13 +43,14 @@ public class Video {
 
     protected Video() { }
 
-    public Video(String resourceId, String bucket, String inputFilePath, String outputFilePath) {
+    public Video(String resourceId, String bucket, String inputFilePath, String inputFilename, String outputFilePath) {
         LocalDateTime now = LocalDateTime.now();
 
         this.id = UUID.randomUUID().toString();
         this.resourceId = resourceId;
         this.bucket = bucket;
         this.inputFilePath = inputFilePath;
+        this.inputFilename = inputFilename;
         this.outputFilePath = outputFilePath;
         this.status = "PENDING";
         this.createdAt = now;
