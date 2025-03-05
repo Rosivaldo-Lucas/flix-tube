@@ -1,8 +1,50 @@
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false
+
 spring:
   application:
     name: ms-video-encoder
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/db-video-encoder
+    username: video-encoder
+    password: video-encoder
+  jpa:
+    generate-ddl: true
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: false
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: local
+    password: local
+  cloud:
+    aws:
+      endpoint: http://localhost:4566
+      region:
+        static: us-east-1
+      credentials:
+        access-key: key
+        secret-key: key
+      s3:
+        enabled: true
+        config:
+          enabled: true
+        region: us-east-1
+        endpoint: http://s3.localhost.localstack.cloud:4566
 
 ms-video-encoder:
+  tmp-dir: tmp
   bucket: videoencoder
-  input-file-path: video-uploaded
-  output-file-path: video-processed
+  input-path: video-uploaded
+  output-path: video-processed

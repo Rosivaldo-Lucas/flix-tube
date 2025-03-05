@@ -1,18 +1,24 @@
 {
   "properties": [
     {
+      "name": "ms-video-encoder.tmp-dir",
+      "type": "java.lang.String",
+      "description": "Description for ms-video-encoder.tmpDir."
+    },
+    {
       "name": "ms-video-encoder.bucket",
       "type": "java.lang.String",
       "description": "Description for ms-video-encoder.bucket."
     },
     {
-      "name": "ms-video-encoder.input-file-path",
+      "name": "ms-video-encoder.input-path",
       "type": "java.lang.String",
-      "description": "Description for ms-video-encoder.input-file-path."
+      "description": "Description for ms-video-encoder.input-path."
     },
     {
-      "name": "ms-video-encoder.output-file-path",
+      "name": "ms-video-encoder.output-path",
       "type": "java.lang.String",
-      "description": "Description for ms-video-encoder.output-file-path."
+      "description": "Description for ms-video-encoder.output-path."
     }
-  ] }
+  ]
+}
