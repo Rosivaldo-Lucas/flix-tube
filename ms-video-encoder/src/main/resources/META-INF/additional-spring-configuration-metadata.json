@@ -1,0 +1,18 @@
+{
+  "properties": [
+    {
+      "name": "ms-video-encoder.bucket",
+      "type": "java.lang.String",
+      "description": "Description for ms-video-encoder.bucket."
+    },
+    {
+      "name": "ms-video-encoder.input-file-path",
+      "type": "java.lang.String",
+      "description": "Description for ms-video-encoder.input-file-path."
+    },
+    {
+      "name": "ms-video-encoder.output-file-path",
+      "type": "java.lang.String",
+      "description": "Description for ms-video-encoder.output-file-path."
+    }
+  ] }

@@ -1,3 +1,8 @@
 spring:
   application:
     name: ms-video-encoder
+
+ms-video-encoder:
+  bucket: videoencoder
+  input-file-path: video-uploaded
+  output-file-path: video-processed
