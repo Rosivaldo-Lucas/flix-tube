@@ -46,5 +46,5 @@ spring:
 ms-video-encoder:
   tmp-dir: tmp
   bucket: videoencoder
-  input-path: video-uploaded
-  output-path: video-processed
+  input-path: uploaded-video
+  output-path: processed-video
