@@ -12,7 +12,7 @@ spring:
       add-mappings: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/db-video-encoder
+    url: jdbc:postgresql://localhost:5432/database-video-encoder
     username: video-encoder
     password: video-encoder
   jpa:
