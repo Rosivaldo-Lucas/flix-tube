@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: database-video-encoder
+    environment:
+      POSTGRES_DB: database-video-encoder
+      POSTGRES_USER: video-encoder
+      POSTGRES_PASSWORD: video-encoder
+    ports:
+      - "5432:5432"
+    volumes:
+      - data_database-video-encoder:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-video-encoder
+    environment:
+      RABBITMQ_DEFAULT_USER: local
+      RABBITMQ_DEFAULT_PASS: local
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - data_rabbitmq-video-encoder:/var/lib/rabbitmq
+      - data_log_rabbitmq-video-encoder:/var/log/rabbitmq
+
+  localstack:
+    image: localstack/localstack
+    container_name: localstack-video-encoder
+    environment:
+      DEBUG: 1
+      LAMBDA_EXECUTOR: docker-reuse
+      DOCKER_HOST: unix://var/run/docker.sock
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    volumes:
+      - data_localstack-video-encoder:/var/lib/localstack
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+volumes:
+  data_database-video-encoder:
+  data_rabbitmq-video-encoder:
+  data_log_rabbitmq-video-encoder:
+  data_localstack-video-encoder:
