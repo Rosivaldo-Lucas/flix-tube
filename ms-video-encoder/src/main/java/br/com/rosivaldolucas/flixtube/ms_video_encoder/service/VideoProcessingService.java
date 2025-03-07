@@ -20,11 +20,8 @@ public class VideoProcessingService {
     }
 
     public void fragment(String inputFilePath, String outputFilePath) {
-        String inputPathWithExtension = String.format("%s.mp4", inputFilePath);
-        String outputPathWithExtension = String.format("%s.frag", outputFilePath);
-
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("mp4fragment", inputPathWithExtension, outputPathWithExtension);
+            ProcessBuilder processBuilder = new ProcessBuilder("mp4fragment", inputFilePath, outputFilePath);
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
@@ -39,10 +36,8 @@ public class VideoProcessingService {
     }
 
     public void encode(String inputFilePath, String outputDir) {
-        String inputPathWithExtension = String.format("%s.frag", inputFilePath);
-
         String[] args = {
-                inputPathWithExtension,
+                inputFilePath,
                 "--use-segment-timeline",
                 "-o", outputDir,
                 "-f",

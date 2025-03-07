@@ -20,6 +20,9 @@ import java.nio.file.Path;
 @Service
 public class VideoProcessingManager {
 
+    private static final String VIDEO_MP4_EXTENSION = ".mp4";
+    private static final String VIDEO_FRAG_EXTENSION = ".frag";
+
     @Value("${ms-video-encoder.tmp-dir}")
     private String TMP_DIR;
 
@@ -40,22 +43,26 @@ public class VideoProcessingManager {
 
         try {
             String pathDir = String.format("%s/%s", this.TMP_DIR, video.getId());
-            String filePath = String.format("%s/%s", pathDir, video.getId());
+            String filenameMp4 = String.format("%s%s", video.getId(), VIDEO_MP4_EXTENSION);
+            String filenameFrag = String.format("%s%s", video.getId(), VIDEO_FRAG_EXTENSION);
+            String filePathMp4 = String.format("%s/%s", pathDir, filenameMp4);
+            String filePathFrag = String.format("%s/%s", pathDir, filenameFrag);
             String key = String.format("%s/%s", video.getInputFilePath(), video.getInputFilename());
 
             this.updateStatus(video, "DOWNLOADING");
             DownloadResponseDTO downloadResponseDTO = this.videoProcessingService.download(this.BUCKET, key);
 
-            this.persistInLocal(pathDir, video.getId(), downloadResponseDTO.contentAsInputStream());
+            this.updateStatus(video, "PERSISTING");
+            this.persistInLocal(pathDir, filenameMp4, downloadResponseDTO.contentAsInputStream());
 
             this.updateStatus(video, "FRAGMENTING");
-            this.videoProcessingService.fragment(filePath, filePath);
+            this.videoProcessingService.fragment(filePathMp4, filePathFrag);
 
             this.updateStatus(video, "ENCODING");
-            this.videoProcessingService.encode(filePath, filePath);
+            this.videoProcessingService.encode(filePathFrag, pathDir);
 
             this.updateStatus(video, "UPLOADING");
-            this.videoProcessingService.upload(filePath, video.getOutputFilePath());
+            this.videoProcessingService.upload(pathDir, video.getOutputFilePath());
         } catch (Exception ex) {
             this.updateStatus(video, "FAILED");
         }
