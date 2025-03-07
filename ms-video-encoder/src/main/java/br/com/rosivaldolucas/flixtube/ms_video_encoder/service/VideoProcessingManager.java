@@ -36,12 +36,7 @@ public class VideoProcessingManager {
     private final VideoProcessingService videoProcessingService;
 
     public void startProcessing(VideoUploadedEventDTO eventDTO) {
-        Video video = new Video(
-                eventDTO.resourceId(), this.BUCKET, this.INPUT_FILE_PATH,
-                eventDTO.inputFilename(), this.OUTPUT_FILE_PATH
-        );
-
-        this.videoRepository.save(video);
+        Video video = this.createAndSaveVideo(eventDTO);
 
         try {
             String pathDir = String.format("%s/%s", this.TMP_DIR, video.getId());
@@ -64,6 +59,15 @@ public class VideoProcessingManager {
         } catch (Exception ex) {
             this.updateStatus(video, "FAILED");
         }
+    }
+
+    private Video createAndSaveVideo(VideoUploadedEventDTO eventDTO) {
+        Video video = new Video(
+                eventDTO.resourceId(), this.BUCKET, this.INPUT_FILE_PATH,
+                eventDTO.inputFilename(), this.OUTPUT_FILE_PATH
+        );
+
+        return this.videoRepository.save(video);
     }
 
     private void updateStatus(Video video, String status) {
