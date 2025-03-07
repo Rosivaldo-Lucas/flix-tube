@@ -18,6 +18,7 @@ public class RabbitMQConfig {
 
     public static final String VIDEO_ENCODER_UPLOADED_DIRECT_EXCHANGE_NAME = "video-encoder-direct-exchange";
     public static final String VIDEO_ENCODER_UPLOADED_QUEUE_NAME = "video-encoder-uploaded-queue";
+    public static final String VIDEO_ENCODER_UPLOADED_ROUTING_KEY = "video-encoder-uploaded-routing-key";
 
     @Bean
     public DirectExchange exchangeVideoEncoderUploaded() {
@@ -37,7 +38,7 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(videoUploadedQueue)
                 .to(videoUploadtedDirectExchange)
-                .withQueueName();
+                .with(VIDEO_ENCODER_UPLOADED_ROUTING_KEY);
     }
 
     @Bean
