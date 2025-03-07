@@ -20,6 +20,11 @@ public class RabbitMQConfig {
     public static final String VIDEO_ENCODER_UPLOADED_QUEUE_NAME = "video-encoder-uploaded-queue";
 
     @Bean
+    public DirectExchange exchangeVideoEncoderUploaded() {
+        return new DirectExchange(VIDEO_ENCODER_UPLOADED_DIRECT_EXCHANGE_NAME, true, false);
+    }
+
+    @Bean
     public Queue queueVideoEncoderUploaded() {
         return new Queue(VIDEO_ENCODER_UPLOADED_QUEUE_NAME, true);
     }
