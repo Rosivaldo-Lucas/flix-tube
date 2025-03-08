@@ -32,7 +32,7 @@ spring:
     password: local
   cloud:
     aws:
-      endpoint: http://172.18.0.4:4566
+      endpoint: ${AWS_ENDPOINT}
       region:
         static: us-east-1
       credentials:
@@ -43,7 +43,7 @@ spring:
         config:
           enabled: true
         region: us-east-1
-        endpoint: http://172.18.0.4:4566
+        endpoint: ${AWS_S3_ENDPOINT}
   threads:
     virtual:
       enabled: true

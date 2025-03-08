@@ -77,7 +77,6 @@ public class FileService {
                     .forEach(p -> {
                         try {
                             Files.delete(p);
-                            log.info("deleted file: {}", p);
                         } catch (IOException ex) {
                             log.error("error deleting file: {}", p, ex);
                             throw new RuntimeException("error deleting file: " + p, ex);

@@ -38,15 +38,12 @@ public class S3Integration {
     }
 
     public void uploadFile(String bucket, String key, InputStream content) {
-        log.info("starting uploading file to S3: bucket={}, key={}", bucket, key);
         try {
             this.s3Template.upload(bucket, key, content);
-            log.info("file uploaded successfully - bucket={}, key={}", bucket, key);
         } catch (Exception ex) {
             log.error("error uploading file to S3 - bucket={}, key={}", bucket, key, ex);
             throw new RuntimeException("error uploading file to S3", ex);
         }
-        log.info("end uploading file to S3");
     }
 
 }
