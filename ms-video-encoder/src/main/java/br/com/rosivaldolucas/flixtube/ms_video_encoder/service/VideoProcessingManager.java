@@ -95,6 +95,7 @@ public class VideoProcessingManager {
             log.info("end processing video");
         } catch (Exception ex) {
             log.error("error processing video with id={}", video.getId(), ex);
+            video.addError(ex.getMessage());
             this.updateStatus(video, "FAILED");
         }
     }

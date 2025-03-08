@@ -35,6 +35,9 @@ public class Video {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "error")
+    private String error;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -59,6 +62,11 @@ public class Video {
 
     public void updateStatus(String status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void addError(String error) {
+        this.error = error;
         this.updatedAt = LocalDateTime.now();
     }
 
