@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,8 +29,16 @@ public class S3Integration {
                     s3Resource.contentLength(),
                     s3Resource.contentType()
             );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void uploadFile(String bucket, String key, InputStream content) {
+        try {
+            this.s3Template.upload(bucket, key, content);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 

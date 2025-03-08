@@ -1,7 +1,5 @@
 package br.com.rosivaldolucas.flixtube.ms_video_encoder.service;
 
-import br.com.rosivaldolucas.flixtube.ms_video_encoder.cloud.S3Integration;
-import br.com.rosivaldolucas.flixtube.ms_video_encoder.cloud.dto.DownloadResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,12 +10,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Service
 public class VideoProcessingService {
-
-    private final S3Integration s3Integration;
-
-    public DownloadResponseDTO download(String bucket, String key) {
-        return this.s3Integration.downloadFile(bucket, key);
-    }
 
     public void fragment(String inputFilePath, String outputFilePath) {
         try {
@@ -57,10 +49,6 @@ public class VideoProcessingService {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException();
         }
-    }
-
-    public void upload(String inputFilePath, String outputFilePath) {
-        String inputPathWithExtension = String.format("%s.mpd", inputFilePath);
     }
 
 }

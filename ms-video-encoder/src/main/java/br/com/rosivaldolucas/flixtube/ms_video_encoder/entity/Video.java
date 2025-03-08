@@ -51,7 +51,7 @@ public class Video {
         this.bucket = bucket;
         this.inputFilePath = inputFilePath;
         this.inputFilename = inputFilename;
-        this.outputFilePath = outputFilePath;
+        this.outputFilePath = String.format("%s/%s", outputFilePath, this.id);
         this.status = "PENDING";
         this.createdAt = now;
         this.updatedAt = now;

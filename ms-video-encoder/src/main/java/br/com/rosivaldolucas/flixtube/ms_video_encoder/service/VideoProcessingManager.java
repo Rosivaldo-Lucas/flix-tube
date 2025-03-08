@@ -1,5 +1,6 @@
 package br.com.rosivaldolucas.flixtube.ms_video_encoder.service;
 
+import br.com.rosivaldolucas.flixtube.ms_video_encoder.cloud.S3Integration;
 import br.com.rosivaldolucas.flixtube.ms_video_encoder.cloud.dto.DownloadResponseDTO;
 import br.com.rosivaldolucas.flixtube.ms_video_encoder.entity.Video;
 import br.com.rosivaldolucas.flixtube.ms_video_encoder.messaging.dto.VideoUploadedEventDTO;
@@ -9,11 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +39,8 @@ public class VideoProcessingManager {
 
     private final VideoRepository videoRepository;
     private final VideoProcessingService videoProcessingService;
+    private final S3Integration s3Integration;
+    private final FileService fileService;
 
     public void startProcessing(VideoUploadedEventDTO eventDTO) {
         Video video = this.createAndSaveVideo(eventDTO);
@@ -50,10 +54,10 @@ public class VideoProcessingManager {
             String key = String.format("%s/%s", video.getInputFilePath(), video.getInputFilename());
 
             this.updateStatus(video, "DOWNLOADING");
-            DownloadResponseDTO downloadResponseDTO = this.videoProcessingService.download(this.BUCKET, key);
+            DownloadResponseDTO downloadResponseDTO = this.s3Integration.downloadFile(this.BUCKET, key);
 
             this.updateStatus(video, "PERSISTING");
-            this.persistInLocal(pathDir, filenameMp4, downloadResponseDTO.contentAsInputStream());
+            this.fileService.persistFile(pathDir, filenameMp4, downloadResponseDTO.contentAsInputStream());
 
             this.updateStatus(video, "FRAGMENTING");
             this.videoProcessingService.fragment(filePathMp4, filePathFrag);
@@ -62,7 +66,11 @@ public class VideoProcessingManager {
             this.videoProcessingService.encode(filePathFrag, pathDir);
 
             this.updateStatus(video, "UPLOADING");
-            this.videoProcessingService.upload(pathDir, video.getOutputFilePath());
+            this.processUpload(pathDir, video);
+
+            this.fileService.cleanDir(pathDir);
+
+            this.updateStatus(video, "COMPLETED");
         } catch (Exception ex) {
             this.updateStatus(video, "FAILED");
         }
@@ -82,22 +90,27 @@ public class VideoProcessingManager {
         this.videoRepository.save(video);
     }
 
-    private void persistInLocal(String pathDir, String filename, InputStream content) {
-        Path path = Path.of(pathDir);
+    private void processUpload(String pathDir, Video video) {
+        String pathEncodedVideo = String.format("%s/video/avc1", pathDir);
 
-        try {
-            Files.createDirectories(path);
-        } catch (IOException e) {
-            throw new RuntimeException();
+        log.info("start process upload the files in path: {}", pathEncodedVideo);
+
+        List<File> files = this.fileService.loadFiles(pathEncodedVideo);
+
+        for (File file : files) {
+            try (InputStream content = Files.newInputStream(Path.of(file.toURI()))) {
+                log.info("uploading file '{}' to '{}'", file.getName(), this.BUCKET + "/" + video.getOutputFilePath());
+
+                String keyOutput = String.format("%s/%s", video.getOutputFilePath(), file.getName());
+
+                this.s3Integration.uploadFile(this.BUCKET, keyOutput, content);
+            } catch (IOException ex) {
+                log.error("error uploading file '{}'", file.getName(), ex);
+                throw new RuntimeException(ex);
+            }
         }
 
-        Path filePath = path.resolve(filename);
-
-        try (OutputStream os = Files.newOutputStream(filePath)) {
-            os.write(content.readAllBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        log.info("end process upload the files in path: {}", pathEncodedVideo);
     }
 
 }
