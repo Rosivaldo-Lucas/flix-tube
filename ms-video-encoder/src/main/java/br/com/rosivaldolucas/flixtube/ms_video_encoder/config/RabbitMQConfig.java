@@ -16,24 +16,27 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String VIDEO_ENCODER_UPLOADED_DIRECT_EXCHANGE_NAME = "video-encoder-direct-exchange";
-    public static final String VIDEO_ENCODER_UPLOADED_QUEUE_NAME = "video-encoder-uploaded-queue";
-    public static final String VIDEO_ENCODER_UPLOADED_ROUTING_KEY = "video-encoder-uploaded-routing-key";
+    public static final String FLIXTUBE_DIRECT_EXCHANGE_NAME = "flixtube.direct";
+    public static final String FLIXTUBE_FANOUT_EXCHANGE_DLX_NAME = "fllixtube.fanout.dlx";
+    public static final String FLIXTUBE_QUEUE_DLQ_NAME = "flixtube.queue.dlq";
+
+    public static final String VIDEO_ENCODER_UPLOADED_QUEUE_NAME = "video-encoder.uploaded.queue";
+    public static final String VIDEO_ENCODER_UPLOADED_ROUTING_KEY = "video-encoder.uploaded.rk";
 
     @Bean
-    public DirectExchange exchangeVideoEncoderUploaded() {
-        return new DirectExchange(VIDEO_ENCODER_UPLOADED_DIRECT_EXCHANGE_NAME, true, false);
+    public DirectExchange flixtubeDirectExchange() {
+        return new DirectExchange(FLIXTUBE_DIRECT_EXCHANGE_NAME, true, false);
     }
 
     @Bean
-    public Queue queueVideoEncoderUploaded() {
+    public Queue videoEncoderUploadedQueue() {
         return new Queue(VIDEO_ENCODER_UPLOADED_QUEUE_NAME, true);
     }
 
     @Bean
-    public Binding bindingVideoEncoderUploadedQueue() {
-        Queue videoUploadedQueue = new Queue(VIDEO_ENCODER_UPLOADED_QUEUE_NAME);
-        DirectExchange videoUploadtedDirectExchange = new DirectExchange(VIDEO_ENCODER_UPLOADED_DIRECT_EXCHANGE_NAME);
+    public Binding bindVideoEncoderUploadedQueueToFlixtubeDirectExchange() {
+        Queue videoUploadedQueue = this.videoEncoderUploadedQueue();
+        DirectExchange videoUploadtedDirectExchange = new DirectExchange(FLIXTUBE_DIRECT_EXCHANGE_NAME);
 
         return BindingBuilder
                 .bind(videoUploadedQueue)
