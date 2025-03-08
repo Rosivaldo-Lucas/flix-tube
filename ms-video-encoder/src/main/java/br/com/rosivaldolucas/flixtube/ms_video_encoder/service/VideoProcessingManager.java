@@ -16,6 +16,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,6 +39,8 @@ public class VideoProcessingManager {
 
     @Value("${ms-video-encoder.output-path}")
     private String OUTPUT_FILE_PATH;
+
+    private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
     private final VideoRepository videoRepository;
     private final VideoProcessingService videoProcessingService;
@@ -66,7 +71,8 @@ public class VideoProcessingManager {
             this.videoProcessingService.encode(filePathFrag, pathDir);
 
             this.updateStatus(video, "UPLOADING");
-            this.processUpload(pathDir, video);
+            boolean isSyncProcessingEnabled = eventDTO.isSyncProcessingEnabled() != null ? eventDTO.isSyncProcessingEnabled() : false;
+            this.processUpload(pathDir, video, isSyncProcessingEnabled);
 
             this.fileService.cleanDir(pathDir);
 
@@ -90,27 +96,56 @@ public class VideoProcessingManager {
         this.videoRepository.save(video);
     }
 
-    private void processUpload(String pathDir, Video video) {
+    private void processUpload(String pathDir, Video video, boolean isSyncProcessingEnabled) {
+        long startTime = System.currentTimeMillis();
+
         String pathEncodedVideo = String.format("%s/video/avc1", pathDir);
 
         log.info("start process upload the files in path: {}", pathEncodedVideo);
 
         List<File> files = this.fileService.loadFiles(pathEncodedVideo);
 
-        for (File file : files) {
-            try (InputStream content = Files.newInputStream(Path.of(file.toURI()))) {
-                log.info("uploading file '{}' to '{}'", file.getName(), this.BUCKET + "/" + video.getOutputFilePath());
-
-                String keyOutput = String.format("%s/%s", video.getOutputFilePath(), file.getName());
-
-                this.s3Integration.uploadFile(this.BUCKET, keyOutput, content);
-            } catch (IOException ex) {
-                log.error("error uploading file '{}'", file.getName(), ex);
-                throw new RuntimeException(ex);
+        if (isSyncProcessingEnabled) {
+            log.info("start process upload the files: sync");
+            for (File file : files) {
+                this.uploadFile(file, video.getOutputFilePath());
             }
+            log.info("end process upload the files: sync");
+        } else {
+            log.info("start process upload the files: async");
+
+            List<CompletableFuture<Void>> futures = files
+                    .stream()
+                    .map(file ->
+                            CompletableFuture.runAsync(() -> this.uploadFile(file, video.getOutputFilePath()), this.executorService))
+                    .toList();
+
+            CompletableFuture<Void> allUploads = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+            try {
+                allUploads.get();
+            } catch (Exception ex) {
+                log.error("error waiting for uploads to complete", ex);
+            }
+
+            log.info("end process upload the files: async");
         }
 
-        log.info("end process upload the files in path: {}", pathEncodedVideo);
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        log.info("end process upload the files in path: {}. Time taken: {} ms", pathEncodedVideo, duration);
+    }
+
+    private void uploadFile(File file, String outputPath) {
+        try (InputStream content = Files.newInputStream(Path.of(file.toURI()))) {
+            String keyOutput = String.format("%s/%s", outputPath, file.getName());
+
+            this.s3Integration.uploadFile(this.BUCKET, keyOutput, content);
+        } catch (IOException ex) {
+            log.error("error uploading file '{}'", file.getName(), ex);
+            throw new RuntimeException(ex);
+        }
     }
 
 }
