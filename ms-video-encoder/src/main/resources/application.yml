@@ -44,6 +44,9 @@ spring:
           enabled: true
         region: us-east-1
         endpoint: http://172.18.0.4:4566
+  threads:
+    virtual:
+      enabled: true
 
 ms-video-encoder:
   tmp-dir: tmp
