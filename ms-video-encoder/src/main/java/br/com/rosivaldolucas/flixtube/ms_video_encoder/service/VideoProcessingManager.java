@@ -48,6 +48,7 @@ public class VideoProcessingManager {
     private final FileService fileService;
 
     public void startProcessing(VideoUploadedEventDTO eventDTO) {
+        log.info("starting processing video: resoourceId={}, inputFilename={}", eventDTO.resourceId(), eventDTO.inputFilename());
         Video video = this.createAndSaveVideo(eventDTO);
 
         try {
@@ -58,49 +59,72 @@ public class VideoProcessingManager {
             String filePathFrag = String.format("%s/%s", pathDir, filenameFrag);
             String key = String.format("%s/%s", video.getInputFilePath(), video.getInputFilename());
 
+            log.info("processing video - pathDir={}, filenameMp4={}, filenameFrag={}, filePathMp4={}, filePathFrag={}", pathDir, filenameMp4, filenameFrag, filePathMp4, filePathFrag);
+
+            log.info("start downloading file from S3 - bucket={}, key={}", this.BUCKET, key);
             this.updateStatus(video, "DOWNLOADING");
             DownloadResponseDTO downloadResponseDTO = this.s3Integration.downloadFile(this.BUCKET, key);
+            log.info("end downloading file from S3");
 
+            log.info("start persisting file to path: {}/{}", pathDir, filenameMp4);
             this.updateStatus(video, "PERSISTING");
             this.fileService.persistFile(pathDir, filenameMp4, downloadResponseDTO.contentAsInputStream());
+            log.info("end persisting file");
 
+            log.info("start fragmentation video");
             this.updateStatus(video, "FRAGMENTING");
             this.videoProcessingService.fragment(filePathMp4, filePathFrag);
+            log.info("end fragmentation video");
 
+            log.info("start encoding video");
             this.updateStatus(video, "ENCODING");
             this.videoProcessingService.encode(filePathFrag, pathDir);
+            log.info("end encoding video");
 
+            log.info("start process upload the files");
             this.updateStatus(video, "UPLOADING");
             boolean isSyncProcessingEnabled = eventDTO.isSyncProcessingEnabled() != null ? eventDTO.isSyncProcessingEnabled() : false;
             this.processUpload(pathDir, video, isSyncProcessingEnabled);
+            log.info("end process upload the files");
 
+            log.info("start cleaning directory");
             this.fileService.cleanDir(pathDir);
+            log.info("end cleaning directory");
 
             this.updateStatus(video, "COMPLETED");
+            log.info("end processing video");
         } catch (Exception ex) {
+            log.error("error processing video with id={}", video.getId(), ex);
             this.updateStatus(video, "FAILED");
         }
     }
 
     private Video createAndSaveVideo(VideoUploadedEventDTO eventDTO) {
+        log.info("starting creating and saving video");
+
         Video video = new Video(
                 eventDTO.resourceId(), this.BUCKET, this.INPUT_FILE_PATH,
                 eventDTO.inputFilename(), this.OUTPUT_FILE_PATH
         );
 
-        return this.videoRepository.save(video);
+        video = this.videoRepository.save(video);
+
+        log.info("end creating and saving video with id={}", video.getId());
+        return video;
     }
 
     private void updateStatus(Video video, String status) {
+        log.info("starting updating video status to: {}", status);
         video.updateStatus(status);
         this.videoRepository.save(video);
+        log.info("end updating video status to: {}", status);
     }
 
     private void processUpload(String pathDir, Video video, boolean isSyncProcessingEnabled) {
+        log.info("starting process upload the files in mode: {}", (isSyncProcessingEnabled ? "sync" : "async"));
         long startTime = System.currentTimeMillis();
 
         String pathEncodedVideo = String.format("%s/video/avc1", pathDir);
-
         log.info("start process upload the files in path: {}", pathEncodedVideo);
 
         List<File> files = this.fileService.loadFiles(pathEncodedVideo);
@@ -144,7 +168,7 @@ public class VideoProcessingManager {
             this.s3Integration.uploadFile(this.BUCKET, keyOutput, content);
         } catch (IOException ex) {
             log.error("error uploading file '{}'", file.getName(), ex);
-            throw new RuntimeException(ex);
+            throw new RuntimeException("error uploading file '" + file.getName() + "'", ex);
         }
     }
 

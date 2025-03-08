@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 @Slf4j
@@ -18,8 +17,11 @@ public class S3Integration {
     private final S3Template s3Template;
 
     public DownloadResponseDTO downloadFile(String bucket, String key) {
+        log.info("starting downloading file from S3: bucket={}, key={}", bucket, key);
         try {
             S3Resource s3Resource = this.s3Template.download(bucket, key);
+            log.info("file downloaded successfully - filename: {}, URL: {}", s3Resource.getFilename(), s3Resource.getURL());
+            log.info("end downloading file from S3");
 
             return new DownloadResponseDTO(
                     s3Resource.getFilename(),
@@ -29,17 +31,22 @@ public class S3Integration {
                     s3Resource.contentLength(),
                     s3Resource.contentType()
             );
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        } catch (Exception ex) {
+            log.error("error downloading file from S3 - bucket={}, key={}", bucket, key, ex);
+            throw new RuntimeException("error downloading file from S3", ex);
         }
     }
 
     public void uploadFile(String bucket, String key, InputStream content) {
+        log.info("starting uploading file to S3: bucket={}, key={}", bucket, key);
         try {
             this.s3Template.upload(bucket, key, content);
+            log.info("file uploaded successfully - bucket={}, key={}", bucket, key);
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            log.error("error uploading file to S3 - bucket={}, key={}", bucket, key, ex);
+            throw new RuntimeException("error uploading file to S3", ex);
         }
+        log.info("end uploading file to S3");
     }
 
 }
