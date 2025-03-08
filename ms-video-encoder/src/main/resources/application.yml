@@ -7,12 +7,14 @@ server:
 spring:
   application:
     name: ms-video-encoder
+  profiles:
+    active: dev
   web:
     resources:
       add-mappings: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/database-video-encoder
+    url: jdbc:postgresql://postgres:5432/database-video-encoder
     username: video-encoder
     password: video-encoder
   jpa:
@@ -24,13 +26,13 @@ spring:
       hibernate:
         format_sql: false
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
     username: local
     password: local
   cloud:
     aws:
-      endpoint: http://localhost:4566
+      endpoint: http://172.18.0.4:4566
       region:
         static: us-east-1
       credentials:
@@ -41,7 +43,7 @@ spring:
         config:
           enabled: true
         region: us-east-1
-        endpoint: http://s3.localhost.localstack.cloud:4566
+        endpoint: http://172.18.0.4:4566
 
 ms-video-encoder:
   tmp-dir: tmp
