@@ -1,9 +1,6 @@
 package br.com.rosivaldolucas.flixtube.ms_video_encoder.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -12,6 +9,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
@@ -24,13 +24,36 @@ public class RabbitMQConfig {
     public static final String VIDEO_ENCODER_UPLOADED_ROUTING_KEY = "video-encoder.uploaded.rk";
 
     @Bean
+    public FanoutExchange flixtubeFanoutExchange() {
+        return new FanoutExchange(FLIXTUBE_FANOUT_EXCHANGE_DLX_NAME, true, false);
+    }
+
+    @Bean
+    public Queue flixtubeQueueDlq() {
+        return new Queue(FLIXTUBE_QUEUE_DLQ_NAME, true);
+    }
+
+    @Bean
+    public Binding bindFlixtubeQueueDlqToFlixtubeFanoutExchange() {
+        Queue flixtubeQueueDlq = this.flixtubeQueueDlq();
+        FanoutExchange flixtubeFanoutExchange = this.flixtubeFanoutExchange();
+
+        return BindingBuilder
+                .bind(flixtubeQueueDlq)
+                .to(flixtubeFanoutExchange);
+    }
+
+    @Bean
     public DirectExchange flixtubeDirectExchange() {
         return new DirectExchange(FLIXTUBE_DIRECT_EXCHANGE_NAME, true, false);
     }
 
     @Bean
     public Queue videoEncoderUploadedQueue() {
-        return new Queue(VIDEO_ENCODER_UPLOADED_QUEUE_NAME, true);
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-dead-letter-exchange", FLIXTUBE_FANOUT_EXCHANGE_DLX_NAME);
+
+        return new Queue(VIDEO_ENCODER_UPLOADED_QUEUE_NAME, true, false, false, args);
     }
 
     @Bean

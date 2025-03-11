@@ -51,13 +51,14 @@ public class VideoProcessingManager {
         log.info("starting processing video: resoourceId={}, inputFilename={}", eventDTO.resourceId(), eventDTO.inputFilename());
         Video video = this.createAndSaveVideo(eventDTO);
 
+        String pathDir = String.format("%s/%s", this.TMP_DIR, video.getId());
+        String filenameMp4 = String.format("%s%s", video.getId(), VIDEO_MP4_EXTENSION);
+        String filenameFrag = String.format("%s%s", video.getId(), VIDEO_FRAG_EXTENSION);
+        String filePathMp4 = String.format("%s/%s", pathDir, filenameMp4);
+        String filePathFrag = String.format("%s/%s", pathDir, filenameFrag);
+        String key = String.format("%s/%s", video.getInputFilePath(), video.getInputFilename());
+
         try {
-            String pathDir = String.format("%s/%s", this.TMP_DIR, video.getId());
-            String filenameMp4 = String.format("%s%s", video.getId(), VIDEO_MP4_EXTENSION);
-            String filenameFrag = String.format("%s%s", video.getId(), VIDEO_FRAG_EXTENSION);
-            String filePathMp4 = String.format("%s/%s", pathDir, filenameMp4);
-            String filePathFrag = String.format("%s/%s", pathDir, filenameFrag);
-            String key = String.format("%s/%s", video.getInputFilePath(), video.getInputFilename());
 
             log.info("processing video - pathDir={}, filenameMp4={}, filenameFrag={}, filePathMp4={}, filePathFrag={}", pathDir, filenameMp4, filenameFrag, filePathMp4, filePathFrag);
 
@@ -97,6 +98,10 @@ public class VideoProcessingManager {
             log.error("error processing video with id={}", video.getId(), ex);
             video.addError(ex.getMessage());
             this.updateStatus(video, "FAILED");
+
+            this.fileService.cleanDir(pathDir);
+
+            throw new RuntimeException("error processing video with id=" + video.getId(), ex);
         }
     }
 

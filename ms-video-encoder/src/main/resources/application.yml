@@ -30,6 +30,9 @@ spring:
     port: 5672
     username: local
     password: local
+    listener:
+      simple:
+        default-requeue-rejected: false
   cloud:
     aws:
       endpoint: ${AWS_ENDPOINT}
