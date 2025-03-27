@@ -1,7 +1,7 @@
 services:
   ms-video-encoder:
     build:
-      context: .
+      context: ./ms-video-encoder
       dockerfile: Dockerfile
     image: ms-video-encoder:latest
     container_name: ms-video-encoder
@@ -22,26 +22,49 @@ services:
     volumes:
       - data_ms-video-encoder:/app
 
+  ms-video-admin:
+    build:
+      context: ./ms-video-admin
+      dockerfile: Dockerfile
+    image: ms-video-admin:latest
+    container_name: ms-video-admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      localstack:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      AWS_ENDPOINT: http://172.18.0.2:4566
+      AWS_S3_ENDPOINT: http://172.18.0.2:4566
+    ports:
+      - "8090:8090"
+      - "5005:5005"
+    volumes:
+      - data_ms-video-admin:/app
+
   postgres:
     image: postgres:latest
-    container_name: database-video-encoder
+    container_name: database-flixtube
     environment:
-      POSTGRES_DB: database-video-encoder
-      POSTGRES_USER: video-encoder
-      POSTGRES_PASSWORD: video-encoder
+      POSTGRES_DB: database-flixtube
+      POSTGRES_USER: flixtube
+      POSTGRES_PASSWORD: flixtube
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U video-encoder -d database-video-encoder" ]
+      test: [ "CMD-SHELL", "pg_isready -U flixtube -d database-flixtube" ]
       interval: 10s
       retries: 5
       start_period: 10s
     ports:
       - "5432:5432"
     volumes:
-      - data_database-video-encoder:/var/lib/postgresql/data
+      - data_database-flixtube:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq-video-encoder
+    container_name: rabbitmq-flixtube
     environment:
       RABBITMQ_DEFAULT_USER: local
       RABBITMQ_DEFAULT_PASS: local
@@ -49,12 +72,12 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - data_rabbitmq-video-encoder:/var/lib/rabbitmq
-      - data_log_rabbitmq-video-encoder:/var/log/rabbitmq
+      - data_rabbitmq-flixtube:/var/lib/rabbitmq
+      - data_log_rabbitmq-flixtube:/var/log/rabbitmq
 
   localstack:
     image: localstack/localstack
-    container_name: localstack-video-encoder
+    container_name: localstack-flixtube
     environment:
       DEBUG: 1
       LAMBDA_EXECUTOR: docker-reuse
@@ -64,12 +87,13 @@ services:
       - "4566:4566"
       - "4510-4559:4510-4559"
     volumes:
-      - data_localstack-video-encoder:/var/lib/localstack
+      - data_localstack-flixtube:/var/lib/localstack
       - "/var/run/docker.sock:/var/run/docker.sock"
 
 volumes:
   data_ms-video-encoder:
-  data_database-video-encoder:
-  data_rabbitmq-video-encoder:
-  data_log_rabbitmq-video-encoder:
-  data_localstack-video-encoder:
+  data_ms-video-admin:
+  data_database-flixtube:
+  data_rabbitmq-flixtube:
+  data_log_rabbitmq-flixtube:
+  data_localstack-flixtube:
