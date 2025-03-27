@@ -28,16 +28,16 @@ public class VideoProcessingManager {
     private static final String VIDEO_MP4_EXTENSION = ".mp4";
     private static final String VIDEO_FRAG_EXTENSION = ".frag";
 
-    @Value("${ms-video-encoder.tmp-dir}")
+    @Value("${flixtube.tmp-dir}")
     private String TMP_DIR;
 
-    @Value("${ms-video-encoder.bucket}")
+    @Value("${flixtube.bucket}")
     private String BUCKET;
 
-    @Value("${ms-video-encoder.input-path}")
+    @Value("${flixtube.input-path}")
     private String INPUT_FILE_PATH;
 
-    @Value("${ms-video-encoder.output-path}")
+    @Value("${flixtube.output-path}")
     private String OUTPUT_FILE_PATH;
 
     private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();

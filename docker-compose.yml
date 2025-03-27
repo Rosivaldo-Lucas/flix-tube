@@ -41,7 +41,7 @@ services:
       AWS_S3_ENDPOINT: http://172.18.0.2:4566
     ports:
       - "8090:8090"
-      - "5005:5005"
+      - "5006:5006"
     volumes:
       - data_ms-video-admin:/app
 
