@@ -1,11 +1,6 @@
 {
   "properties": [
     {
-      "name": "flixtube.tmp-dir",
-      "type": "java.lang.String",
-      "description": "Description for flixtube.tmpDir."
-    },
-    {
       "name": "flixtube.bucket",
       "type": "java.lang.String",
       "description": "Description for flixtube.bucket."
@@ -14,11 +9,5 @@
       "name": "flixtube.input-path",
       "type": "java.lang.String",
       "description": "Description for flixtube.input-path."
-    },
-    {
-      "name": "flixtube.output-path",
-      "type": "java.lang.String",
-      "description": "Description for flixtube.output-path."
     }
-  ]
-}
+  ] }

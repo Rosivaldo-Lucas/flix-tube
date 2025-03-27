@@ -1,3 +1,53 @@
+server:
+  port: 8090
+  error:
+    whitelabel:
+      enabled: false
+
 spring:
   application:
     name: ms-video-admin
+  profiles:
+    active: dev
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/database-flixtube
+    username: flixtube
+    password: flixtube
+  jpa:
+    generate-ddl: true
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: false
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: local
+    password: local
+    listener:
+      simple:
+        default-requeue-rejected: false
+  cloud:
+    aws:
+      endpoint: ${AWS_ENDPOINT}
+      region:
+        static: us-east-1
+      credentials:
+        access-key: key
+        secret-key: key
+      s3:
+        enabled: true
+        config:
+          enabled: true
+        region: us-east-1
+        endpoint: ${AWS_S3_ENDPOINT}
+
+flixtube:
+  bucket: videoencoder
+  input-path: uploaded-video

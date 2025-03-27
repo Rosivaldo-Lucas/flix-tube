@@ -51,7 +51,7 @@ spring:
     virtual:
       enabled: true
 
-ms-video-encoder:
+flixtube:
   tmp-dir: tmp
   bucket: videoencoder
   input-path: uploaded-video
