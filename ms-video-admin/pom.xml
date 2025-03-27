@@ -7,15 +7,15 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.3</version>
+		<version>3.4.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>br.com.rosivaldolucas.flixtube</groupId>
-	<artifactId>ms-video-encoder</artifactId>
+	<artifactId>ms-video-admin</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ms-video-encoder</name>
-	<description>Video Encoder Project</description>
+	<name>ms-video-admin</name>
+	<description>Video Admin Project</description>
 	<url/>
 
 	<licenses>
@@ -35,7 +35,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<spring-cloud.version>2024.0.0</spring-cloud.version>
+		<spring-cloud.version>2024.0.1</spring-cloud.version>
 		<spring-cloud-aws.version>3.3.0</spring-cloud-aws.version>
 	</properties>
 
@@ -68,6 +68,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- SPRING VALIDATION -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
 		<!-- SPRING DATA JPA -->
