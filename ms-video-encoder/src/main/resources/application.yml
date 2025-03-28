@@ -18,13 +18,16 @@ spring:
     username: flixtube
     password: flixtube
   jpa:
-    generate-ddl: true
+    generate-ddl: false
     show-sql: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: false
+  flyway:
+    enabled: true
+    default-schema: db_video_encoder
   rabbitmq:
     host: rabbitmq
     port: 5672
