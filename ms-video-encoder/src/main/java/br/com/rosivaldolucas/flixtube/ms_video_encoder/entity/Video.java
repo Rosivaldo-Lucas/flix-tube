@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Getter
 @Entity
-@Table(name = "video")
+@Table(name = "video", schema = "db_video_encoder")
 public class Video {
 
     @Id
@@ -49,13 +49,14 @@ public class Video {
     public Video(String resourceId, String bucket, String inputFilePath, String inputFilename, String outputFilePath) {
         LocalDateTime now = LocalDateTime.now();
 
-        this.id = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString().replaceAll("-", "");
         this.resourceId = resourceId;
         this.bucket = bucket;
         this.inputFilePath = inputFilePath;
         this.inputFilename = inputFilename;
         this.outputFilePath = String.format("%s/%s", outputFilePath, this.id);
         this.status = "PENDING";
+        this.error = "";
         this.createdAt = now;
         this.updatedAt = now;
     }

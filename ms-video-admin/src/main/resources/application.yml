@@ -4,6 +4,12 @@ server:
     whitelabel:
       enabled: false
 
+logging:
+  level:
+    org:
+      springframework:
+        web=DEBUG:
+
 spring:
   application:
     name: ms-video-admin
@@ -12,9 +18,14 @@ spring:
   web:
     resources:
       add-mappings: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres:5432/database-flixtube
+    url: jdbc:postgresql://localhost:5432/database-flixtube
     username: flixtube
     password: flixtube
   jpa:
@@ -29,7 +40,7 @@ spring:
     enabled: true
     default-schema: db_video_admin
   rabbitmq:
-    host: rabbitmq
+    host: localhost
     port: 5672
     username: local
     password: local
@@ -38,7 +49,7 @@ spring:
         default-requeue-rejected: false
   cloud:
     aws:
-      endpoint: ${AWS_ENDPOINT}
+      endpoint: ${AWS_ENDPOINT:http://172.20.0.2:4566}
       region:
         static: us-east-1
       credentials:
@@ -49,7 +60,7 @@ spring:
         config:
           enabled: true
         region: us-east-1
-        endpoint: ${AWS_S3_ENDPOINT}
+        endpoint: ${AWS_S3_ENDPOINT:http://172.20.0.2:4566}
 
 flixtube:
   bucket: videoencoder
