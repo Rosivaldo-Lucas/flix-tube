@@ -17,11 +17,8 @@ public class S3Integration {
     private final S3Template s3Template;
 
     public DownloadResponseDTO downloadFile(String bucket, String key) {
-        log.info("starting downloading file from S3: bucket={}, key={}", bucket, key);
         try {
             S3Resource s3Resource = this.s3Template.download(bucket, key);
-            log.info("file downloaded successfully - filename: {}, URL: {}", s3Resource.getFilename(), s3Resource.getURL());
-            log.info("end downloading file from S3");
 
             return new DownloadResponseDTO(
                     s3Resource.getFilename(),
@@ -32,7 +29,6 @@ public class S3Integration {
                     s3Resource.contentType()
             );
         } catch (Exception ex) {
-            log.error("error downloading file from S3 - bucket={}, key={}", bucket, key, ex);
             throw new RuntimeException("error downloading file from S3", ex);
         }
     }
@@ -41,7 +37,6 @@ public class S3Integration {
         try {
             this.s3Template.upload(bucket, key, content);
         } catch (Exception ex) {
-            log.error("error uploading file to S3 - bucket={}, key={}", bucket, key, ex);
             throw new RuntimeException("error uploading file to S3", ex);
         }
     }

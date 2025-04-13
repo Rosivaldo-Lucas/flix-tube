@@ -12,7 +12,6 @@ import java.io.IOException;
 public class VideoProcessingService {
 
     public void fragment(String inputFilePath, String outputFilePath) {
-        log.info("starting fragmentation: input={}, output={}", inputFilePath, outputFilePath);
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("mp4fragment", inputFilePath, outputFilePath);
             processBuilder.redirectErrorStream(true);
@@ -21,24 +20,18 @@ public class VideoProcessingService {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                log.error("fragmentation failed with exit code: {}", exitCode);
                 throw new RuntimeException("fragmentation process failed");
             }
 
-            log.info("fragmentation completed successfully");
         } catch (IOException ex) {
-            log.error("error during fragmentation", ex);
             throw new RuntimeException("error during fragmentation", ex);
         } catch (InterruptedException ex) {
-            log.error("fragmentation interrupted", ex);
             throw new RuntimeException("fragmentation interrupted", ex);
         }
         log.info("end fragmentation");
     }
 
     public void encode(String inputFilePath, String outputDir) {
-        log.info("starting encoding: input={}, outputDir={}", inputFilePath, outputDir);
-
         String[] args = {
                 inputFilePath,
                 "--use-segment-timeline",
@@ -55,19 +48,13 @@ public class VideoProcessingService {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                log.error("encoding failed with exit code: {}", exitCode);
                 throw new RuntimeException("encoding process failed");
             }
-
-            log.info("encoding completed successfully");
         } catch (IOException ex) {
-            log.error("error during encoding", ex);
             throw new RuntimeException("error during encoding");
         } catch (InterruptedException ex) {
-            log.error("encoding interrupted", ex);
             throw new RuntimeException("encoding interrupted", ex);
         }
-        log.info("end encoding");
     }
 
 }
