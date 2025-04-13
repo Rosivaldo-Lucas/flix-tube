@@ -3,7 +3,7 @@ package br.com.rosivaldolucas.flixtube.ms_video_admin.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -32,20 +32,29 @@ public class Video {
     @Column(name = "encoded_location")
     private String encodedLocation;
 
+    @Column(name = "error")
+    private String error;
+
     @Column(name = "media_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private VideoStatus status;
 
     @Column(name = "created_at", nullable = false)
-    private Instant created_at;
+    private LocalDateTime created_at;
 
     @Column(name = "updated_at", nullable = false)
-    private Instant updated_at;
+    private LocalDateTime updated_at;
+
+    @Column(name = "processing_started_at")
+    private LocalDateTime processingStartedAt;
+
+    @Column(name = "processing_ended_at")
+    private LocalDateTime processingEndedAt;
 
     protected Video() { }
 
     private Video(String title, String description, Double duration, String filename, String rawLocation) {
-        Instant now = Instant.now();
+        LocalDateTime now = LocalDateTime.now();
 
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
         this.title = title;
@@ -60,6 +69,15 @@ public class Video {
 
     public static Video create(String title, String description, Double duration, String filename, String rawLocation) {
         return new Video(title, description, duration, filename, rawLocation);
+    }
+
+    public void updateAfterProcessing(String encodedLocation, String error, VideoStatus status, LocalDateTime processingStartedAt, LocalDateTime processingEndedAt) {
+        this.encodedLocation = encodedLocation;
+        this.error = error;
+        this.status = status;
+        this.processingStartedAt = processingStartedAt;
+        this.processingEndedAt = processingEndedAt;
+        this.updated_at = LocalDateTime.now();
     }
 
 }

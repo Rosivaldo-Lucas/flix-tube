@@ -1,4 +1,4 @@
-package br.com.rosivaldolucas.flixtube.ms_video_admin.messaging;
+package br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

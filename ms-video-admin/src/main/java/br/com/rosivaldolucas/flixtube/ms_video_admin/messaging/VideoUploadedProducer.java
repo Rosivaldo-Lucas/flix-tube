@@ -1,6 +1,7 @@
 package br.com.rosivaldolucas.flixtube.ms_video_admin.messaging;
 
 import br.com.rosivaldolucas.flixtube.ms_video_admin.config.RabbitMQConfig;
+import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.dto.VideoUploadedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;

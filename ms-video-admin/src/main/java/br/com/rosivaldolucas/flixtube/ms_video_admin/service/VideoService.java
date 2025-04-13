@@ -3,8 +3,9 @@ package br.com.rosivaldolucas.flixtube.ms_video_admin.service;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.cloud.S3Integration;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.controller.dto.CreateVideoRequest;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.entity.Video;
-import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.VideoUploadedEvent;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.VideoUploadedProducer;
+import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.dto.VideoProcessedEvent;
+import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.dto.VideoUploadedEvent;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,18 @@ public class VideoService {
 
         this.uploadVideo(video, createVideoRequest.getResource().getContent());
         this.sendVideoUploadedEvent(video);
+    }
+
+    public void updateVideoAfterProcessing(VideoProcessedEvent event) {
+        Video video = this.videoRepository.findById(event.getTransactionId()).orElseThrow();
+
+        video.updateAfterProcessing(
+                event.getOutputPath(),
+                event.getError(),
+                event.getStatus(),
+                event.getProcessingStartedAt(),
+                event.getProcessingEndedAt()
+        );
     }
 
     private void uploadVideo(Video video, byte[] content) {
