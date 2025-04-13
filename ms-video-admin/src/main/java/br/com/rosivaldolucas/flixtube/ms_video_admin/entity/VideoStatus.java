@@ -1,6 +1,6 @@
 package br.com.rosivaldolucas.flixtube.ms_video_admin.entity;
 
-public enum MediaStatus {
+public enum VideoStatus {
 
     PENDING,
     PROCESSING,

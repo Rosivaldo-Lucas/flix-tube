@@ -7,17 +7,23 @@ import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.VideoUploadedEven
 import br.com.rosivaldolucas.flixtube.ms_video_admin.messaging.VideoUploadedProducer;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class VideoService {
 
-    private String BUCKET = "videoencoder";
-    private String UPLOAD_PATH = "uploaded-video";
+    @Value("${flixtube.bucket}")
+    private String BUCKET;
+
+    @Value("${flixtube.upload-path}")
+    private String UPLOAD_PATH;
 
     private final VideoRepository videoRepository;
     private final S3Integration s3Integration;
@@ -29,22 +35,31 @@ public class VideoService {
                 createVideoRequest.getDescription(),
                 createVideoRequest.getDuration(),
                 createVideoRequest.getResource().getFilename(),
-                this.UPLOAD_PATH
+                String.format("%s/%s", this.BUCKET, this.UPLOAD_PATH)
         );
 
         video = this.videoRepository.save(video);
 
-        String key = String.format("%s/%s.mp4", this.UPLOAD_PATH, video.getId());
+        log.info("Transaction Id: {} - Created video with data: {}", video.getId(), video);
 
-        InputStream content = new ByteArrayInputStream(createVideoRequest.getResource().getContent());
+        this.uploadVideo(video, createVideoRequest.getResource().getContent());
+        this.sendVideoUploadedEvent(video);
+    }
 
-        this.s3Integration.uploadFile(this.BUCKET, key, content);
+    private void uploadVideo(Video video, byte[] content) {
+        String key = String.format("%s/%s/%s.mp4", this.UPLOAD_PATH, video.getId(), video.getFilename());
 
-        VideoUploadedEvent event = VideoUploadedEvent
-                .builder()
-                .resourceId(String.format("video-encoder_%s", video.getId()))
-                .inputFilename(String.format("%s.mp4", video.getId()))
-                .build();
+        InputStream contentInputStream = new ByteArrayInputStream(content);
+
+        this.s3Integration.uploadFile(this.BUCKET, key, contentInputStream);
+    }
+
+    private void sendVideoUploadedEvent(Video video) {
+        String transactionId = video.getId();
+        String inputPath = String.format("%s/%s", this.UPLOAD_PATH, video.getId());
+        String filename = String.format("%s.mp4", video.getFilename());
+
+        VideoUploadedEvent event = new VideoUploadedEvent(transactionId, inputPath, filename);
 
         this.videoUploadedProducer.send(event);
     }

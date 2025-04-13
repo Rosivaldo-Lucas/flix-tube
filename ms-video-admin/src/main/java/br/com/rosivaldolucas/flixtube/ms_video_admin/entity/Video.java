@@ -23,33 +23,43 @@ public class Video {
     @Column(name = "duration", nullable = false)
     private Double duration;
 
+    @Column(name = "filename", nullable = false)
+    private String filename;
+
+    @Column(name = "raw_location", nullable = false)
+    private String rawLocation;
+
+    @Column(name = "encoded_location")
+    private String encodedLocation;
+
+    @Column(name = "media_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private VideoStatus status;
+
     @Column(name = "created_at", nullable = false)
     private Instant created_at;
 
     @Column(name = "updated_at", nullable = false)
     private Instant updated_at;
 
-    @Embedded
-    private VideoMedia videoMedia;
-
     protected Video() { }
 
-    private Video(String title, String description, Double duration, VideoMedia videoMedia) {
+    private Video(String title, String description, Double duration, String filename, String rawLocation) {
         Instant now = Instant.now();
 
         this.id = UUID.randomUUID().toString().replaceAll("-", "");
         this.title = title;
         this.description = description;
         this.duration = duration;
+        this.filename = filename;
+        this.rawLocation = rawLocation;
+        this.status = VideoStatus.PENDING;
         this.created_at = now;
         this.updated_at = now;
-        this.videoMedia = videoMedia;
     }
 
     public static Video create(String title, String description, Double duration, String filename, String rawLocation) {
-        VideoMedia videoMedia = VideoMedia.create(filename, rawLocation, MediaStatus.PENDING);
-
-        return new Video(title, description, duration, videoMedia);
+        return new Video(title, description, duration, filename, rawLocation);
     }
 
 }

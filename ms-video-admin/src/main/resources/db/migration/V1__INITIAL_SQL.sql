@@ -5,8 +5,8 @@ CREATE TABLE db_video_admin.video (
     duration NUMERIC(5, 2) NOT NULL,
     filename VARCHAR(255) NOT NULL,
     raw_location VARCHAR(255) NOT NULL,
-    encoded_location VARCHAR(500) NOT NULL,
-    media_status VARCHAR(50) NOT NULL,
+    encoded_location VARCHAR(500) NOT,
+    status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP(6) NOT NULL,
     updated_at TIMESTAMP(6) NOT NULL
 );

@@ -6,7 +6,7 @@
       "description": "Description for flixtube.bucket."
     },
     {
-      "name": "flixtube.output-path",
+      "name": "flixtube.upload-path",
       "type": "java.lang.String",
       "description": "Description for flixtube.output-path."
     }
