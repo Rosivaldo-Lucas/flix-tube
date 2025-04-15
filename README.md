@@ -1,32 +1,31 @@
-# Video Encoder Service
+# Flixtube Project
 
-This project aims to perform MP4 video encoding using the Bento4 tool.
-It was developed in Java with Spring Boot and Spring Cloud, providing a scalable and efficient solution for video processing.
+## Microservices
 
-## Technologies Used
+### Video Admin
 
-- **Java**
-- **Spring Boot**
-- **Spring Cloud AWS S3**
-- **PostgreSQL**
-- **Bento4**
-- **Docker**
-- **RabbitMQ** (for asynchronous processing)
-- **LocalStack** (to simulate S3 locally)
+The **Video Admin** service is responsible for orchestrating the video upload and
+management workflow within the platform. Its main responsibilities include:
 
-## How It Works
+- Receiving videos uploaded by user admin
+- Storing the videos
+- Uploading the videos to an AWS S3 bucket
+- Communicating with the **Video Encoder** microservice through a RabbitMQ queue, sending the necessary information for video processing
+- Receiving notifications from the Video Encoder (also via RabbitMQ) once the processing in complete
+- Updating the video status in its database based on the response received from the **Video Encoder** service
 
-1. The video name is received through a RabbitMQ queue.
-2. The system reads the queue, retrieves the video from an S3 bucket (simulated with LocalStack), and starts the encoding process.
-3. Once processing is complete, the system uploads the video fragments to a designated folder in the S3 bucket.
-4. The system logs the processing status and ensures reliability through message queue management.
+### Video Encoder
 
-## Features
+The **Video Encoder** service is responsible for:
 
-- Asynchronous video encoding using message queues.
-- Integration with S3 storage (using LocalStack for local simulation).
-- Processing and conversion using Bento4.
-- Logging and monitoring of the encoding process.
+- Receiving messages from the RabbitMQ queue with information about the videos to be processed
+- Downloading the corresponding video from AWS S3 bucket
+- Performing the video encoding process
+- Uploading the processed video to an AWS S3 bucket
+- Notifying the **Video Admin** service via RabbitMQ once the processing is complete, indicating whether it succeeded or failed
 
 ## Tech Design
-![video-encoder-tech-design.png](docs/video-encoder-tech-design.png)
+![videoadmin-videoencoder-diagram.png](docs/videoadmin-videoencoder-diagram.png)
+
+### Flow diagram
+![flixtube-sequence-diagrams.png](docs/flixtube-sequence-diagrams.png)
