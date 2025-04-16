@@ -20,11 +20,13 @@ import java.util.stream.Stream;
 public class FileService {
 
     public void persistFile(String pathDir, String filename, InputStream content) {
+        log.info("Start persisting file: {} on directory: {}", filename, pathDir);
         Path path = Path.of(pathDir);
 
         try {
             Files.createDirectories(path);
         } catch (IOException ex) {
+            log.error("Error creating directory: {}", path, ex);
             throw new RuntimeException("error creating directory: " + path, ex);
         }
 
@@ -32,14 +34,15 @@ public class FileService {
 
         try (OutputStream os = Files.newOutputStream(filePath)) {
             os.write(content.readAllBytes());
+            log.info("Successfully persisted file: {} on directory: {}", filename, pathDir);
         } catch (IOException ex) {
+            log.error("Error persisting file: {} on directory: {}", filename, pathDir, ex);
             throw new RuntimeException("error persisting file: " + filePath, ex);
         }
-
-        log.info("end persisting");
     }
 
     public List<File> loadFiles(String pathDir) {
+        log.info("Start loading files from path: {}", pathDir);
         List<File> paths = new ArrayList<>();
 
         Path path = Path.of(pathDir);
@@ -47,16 +50,20 @@ public class FileService {
 
         if (files != null) {
             paths.addAll(Arrays.asList(files));
+            log.info("{} files loaded from {}", files.length, path.toAbsolutePath());
         } else {
+            log.info("0 files loaded from {}", path.toAbsolutePath());
         }
 
         return paths;
     }
 
     public void cleanDir(String pathDir) {
+        log.info("Start cleaning up directory: {}", pathDir);
         Path path = Path.of(pathDir);
 
         if (!Files.exists(path)) {
+            log.info("{} directory does not exist", path.toAbsolutePath());
             return;
         }
 
@@ -66,11 +73,14 @@ public class FileService {
                         try {
                             Files.delete(p);
                         } catch (IOException ex) {
-                            throw new RuntimeException("error deleting file: " + p, ex);
+                            log.error("Error deleting file: {}", p, ex);
+                            throw new RuntimeException("Error deleting file: " + p, ex);
                         }
                     });
+            log.info("Successfully cleaned up directory: {}", path.toAbsolutePath());
         } catch (IOException ex) {
-            throw new RuntimeException("error cleaning directory: " + pathDir, ex);
+            log.error("Error cleaning up directory: {}", pathDir, ex);
+            throw new RuntimeException("Error cleaning directory: " + pathDir, ex);
         }
     }
 
