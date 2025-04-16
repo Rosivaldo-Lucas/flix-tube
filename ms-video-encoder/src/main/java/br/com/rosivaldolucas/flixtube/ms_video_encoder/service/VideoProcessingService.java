@@ -12,6 +12,9 @@ import java.io.IOException;
 public class VideoProcessingService {
 
     public void fragment(String inputFilePath, String outputFilePath) {
+        log.info("Start fragment processing...");
+        log.info("Input file to fragmentation: {}. Output file result the fragmentation: {}", inputFilePath, outputFilePath);
+
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("mp4fragment", inputFilePath, outputFilePath);
             processBuilder.redirectErrorStream(true);
@@ -20,18 +23,24 @@ public class VideoProcessingService {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new RuntimeException("fragmentation process failed");
+                log.error("Fragmentation process failed. Process exited with code {}", exitCode);
+                throw new RuntimeException("Fragmentation process failed");
             }
 
+            log.info("Fragmentation process finished");
         } catch (IOException ex) {
-            throw new RuntimeException("error during fragmentation", ex);
+            log.error("Error during fragmentation", ex);
+            throw new RuntimeException("Error during fragmentation", ex);
         } catch (InterruptedException ex) {
-            throw new RuntimeException("fragmentation interrupted", ex);
+            log.error("Fragmentation interrupted", ex);
+            throw new RuntimeException("Fragmentation interrupted", ex);
         }
-        log.info("end fragmentation");
     }
 
     public void encode(String inputFilePath, String outputDir) {
+        log.info("Start encode processing...");
+        log.info("Input file to encode: {}. Output dir result the encoding: {}", inputFilePath, outputDir);
+
         String[] args = {
                 inputFilePath,
                 "--use-segment-timeline",
@@ -48,12 +57,17 @@ public class VideoProcessingService {
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new RuntimeException("encoding process failed");
+                log.error("Encoding process failed. Process exited with code {}", exitCode);
+                throw new RuntimeException("Encoding process failed");
             }
+
+            log.info("Encoding process finished");
         } catch (IOException ex) {
-            throw new RuntimeException("error during encoding");
+            log.error("Error during encoding", ex);
+            throw new RuntimeException("Error during encoding", ex);
         } catch (InterruptedException ex) {
-            throw new RuntimeException("encoding interrupted", ex);
+            log.error("Encoding interrupted", ex);
+            throw new RuntimeException("Encoding interrupted", ex);
         }
     }
 
