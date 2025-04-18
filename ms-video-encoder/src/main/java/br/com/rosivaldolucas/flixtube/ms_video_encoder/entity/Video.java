@@ -7,7 +7,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Entity
@@ -15,48 +14,44 @@ import java.util.UUID;
 public class Video {
 
     @Id
-    private String id;
+    @Column(name = "transaction_id", unique = true, nullable = false)
+    private String transactionId;
 
-    @Column(name = "resource_id")
-    private String resourceId;
-
-    @Column(name = "bucket")
+    @Column(name = "bucket", nullable = false)
     private String bucket;
 
-    @Column(name = "input_file_path")
-    private String inputFilePath;
+    @Column(name = "input_path", nullable = false)
+    private String inputPath;
 
-    @Column(name = "input_filename")
+    @Column(name = "output_path", nullable = false)
+    private String outputPath;
+
+    @Column(name = "input_filename", nullable = false)
     private String inputFilename;
 
-    @Column(name = "output_file_path")
-    private String outputFilePath;
-
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private String status;
 
     @Column(name = "error")
     private String error;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     protected Video() { }
 
-    public Video(String resourceId, String bucket, String inputFilePath, String inputFilename, String outputFilePath) {
+    public Video(String transactionId, String bucket, String inputPath, String outputPath, String inputFilename) {
         LocalDateTime now = LocalDateTime.now();
 
-        this.id = UUID.randomUUID().toString().replaceAll("-", "");
-        this.resourceId = resourceId;
+        this.transactionId = transactionId;
         this.bucket = bucket;
-        this.inputFilePath = inputFilePath;
+        this.inputPath = inputPath;
+        this.outputPath = outputPath;
         this.inputFilename = inputFilename;
-        this.outputFilePath = String.format("%s/%s", outputFilePath, this.id);
         this.status = "PENDING";
-        this.error = "";
         this.createdAt = now;
         this.updatedAt = now;
     }

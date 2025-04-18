@@ -56,6 +56,5 @@ spring:
 
 flixtube:
   tmp-dir: tmp
-  bucket: videoencoder
-  input-path: uploaded-video
-  output-path: processed-video
+  bucket: flixtube
+  upload-path: upload-video

@@ -34,11 +34,8 @@ public class VideoProcessingManager {
     @Value("${flixtube.bucket}")
     private String BUCKET;
 
-    @Value("${flixtube.input-path}")
-    private String INPUT_FILE_PATH;
-
-    @Value("${flixtube.output-path}")
-    private String OUTPUT_FILE_PATH;
+    @Value("${flixtube.upload-path}")
+    private String UPLOAD_PATH;
 
     private final ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor();
 
@@ -50,32 +47,37 @@ public class VideoProcessingManager {
     public void startProcessing(VideoUploadedEventDTO eventDTO) {
         Video video = this.createAndSaveVideo(eventDTO);
 
-        String pathDir = String.format("%s/%s", this.TMP_DIR, video.getId());
-        String filenameMp4 = String.format("%s%s", video.getId(), VIDEO_MP4_EXTENSION);
-        String filenameFrag = String.format("%s%s", video.getId(), VIDEO_FRAG_EXTENSION);
+        String pathDir = String.format("%s/%s", this.TMP_DIR, video.getTransactionId());
+        String filenameMp4 = String.format("%s%s", video.getTransactionId(), VIDEO_MP4_EXTENSION);
+        String filenameFrag = String.format("%s%s", video.getTransactionId(), VIDEO_FRAG_EXTENSION);
         String filePathMp4 = String.format("%s/%s", pathDir, filenameMp4);
         String filePathFrag = String.format("%s/%s", pathDir, filenameFrag);
-        String key = String.format("%s/%s", video.getInputFilePath(), video.getInputFilename());
+        String key = String.format("%s/%s", video.getInputPath(), video.getInputFilename());
 
         try {
+            log.info("Downloading video with transactionId = '{}'", video.getTransactionId());
             this.updateStatus(video, "DOWNLOADING");
             DownloadResponseDTO downloadResponseDTO = this.s3Integration.downloadFile(this.BUCKET, key);
 
+            log.info("Persisting locally video with transactionId = '{}'", video.getTransactionId());
             this.updateStatus(video, "PERSISTING");
             this.fileService.persistFile(pathDir, filenameMp4, downloadResponseDTO.contentAsInputStream());
 
+            log.info("Fragmenting video with transactionId = '{}'", video.getTransactionId());
             this.updateStatus(video, "FRAGMENTING");
             this.videoProcessingService.fragment(filePathMp4, filePathFrag);
 
+            log.info("Encoding video with transactionId = '{}'", video.getTransactionId());
             this.updateStatus(video, "ENCODING");
             this.videoProcessingService.encode(filePathFrag, pathDir);
 
+            log.info("Uploading video with transactionId = '{}'", video.getTransactionId());
             this.updateStatus(video, "UPLOADING");
-            boolean isSyncProcessingEnabled = eventDTO.isSyncProcessingEnabled() != null ? eventDTO.isSyncProcessingEnabled() : false;
-            this.processUpload(pathDir, video, isSyncProcessingEnabled);
+            this.processUpload(pathDir, video, false);
 
             this.fileService.cleanDir(pathDir);
 
+            log.info("Completed video with transactionId = '{}'", video.getTransactionId());
             this.updateStatus(video, "COMPLETED");
         } catch (Exception ex) {
             video.addError(ex.getMessage());
@@ -83,17 +85,22 @@ public class VideoProcessingManager {
 
             this.fileService.cleanDir(pathDir);
 
-            throw new RuntimeException("error processing video with id=" + video.getId(), ex);
+            log.error("Error processing video with transactionId = '{}'", video.getTransactionId(), ex);
+            throw new RuntimeException("Error processing video with transactionId = " + video.getTransactionId(), ex);
         }
     }
 
     private Video createAndSaveVideo(VideoUploadedEventDTO eventDTO) {
+        String outputPath = String.format("%s/$%s", this.UPLOAD_PATH, eventDTO.transactionId());
+
         Video video = new Video(
-                eventDTO.resourceId(), this.BUCKET, this.INPUT_FILE_PATH,
-                eventDTO.inputFilename(), this.OUTPUT_FILE_PATH
+                eventDTO.transactionId(), this.BUCKET, this.UPLOAD_PATH,
+                outputPath, eventDTO.filename()
         );
 
         video = this.videoRepository.save(video);
+
+        log.info("Saving video with transactionId = '{}'", video.getTransactionId());
 
         return video;
     }
@@ -110,15 +117,18 @@ public class VideoProcessingManager {
 
         List<File> files = this.fileService.loadFiles(pathEncodedVideo);
 
+        log.info("Upload video to path = '{}'", video.getOutputPath());
         if (isSyncProcessingEnabled) {
+            log.info("Start sync processing upload video fragments with transactionId = '{}'", video.getTransactionId());
             for (File file : files) {
-                this.uploadFile(file, video.getOutputFilePath());
+                this.uploadFile(file, video.getOutputPath());
             }
         } else {
+            log.info("Start async processing upload video fragments with transactionId = '{}'", video.getTransactionId());
             List<CompletableFuture<Void>> futures = files
                     .stream()
                     .map(file ->
-                            CompletableFuture.runAsync(() -> this.uploadFile(file, video.getOutputFilePath()), this.executorService))
+                            CompletableFuture.runAsync(() -> this.uploadFile(file, video.getOutputPath()), this.executorService))
                     .toList();
 
             CompletableFuture<Void> allUploads = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
@@ -126,11 +136,13 @@ public class VideoProcessingManager {
             try {
                 allUploads.get();
             } catch (Exception ex) {
+                log.error("Error processing upload video with transactionId = '{}'", video.getTransactionId(), ex);
             }
         }
 
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
+        log.info("Upload completed in {} ms", duration);
     }
 
     private void uploadFile(File file, String outputPath) {
@@ -139,7 +151,8 @@ public class VideoProcessingManager {
 
             this.s3Integration.uploadFile(this.BUCKET, keyOutput, content);
         } catch (IOException ex) {
-            throw new RuntimeException("error uploading file '" + file.getName() + "'", ex);
+            log.error("Error uploading file '{}'", file.getName(), ex);
+            throw new RuntimeException("Error uploading file '" + file.getName() + "'", ex);
         }
     }
 

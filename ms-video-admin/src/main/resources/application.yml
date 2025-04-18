@@ -64,4 +64,4 @@ spring:
 
 flixtube:
   bucket: videoencoder
-  upload-path: uploaded-video
+  upload-path: upload-video

@@ -11,14 +11,9 @@
       "description": "Description for flixtube.bucket."
     },
     {
-      "name": "flixtube.input-path",
+      "name": "flixtube.upload-path",
       "type": "java.lang.String",
-      "description": "Description for flixtube.input-path."
-    },
-    {
-      "name": "flixtube.output-path",
-      "type": "java.lang.String",
-      "description": "Description for flixtube.output-path."
+      "description": "Description for flixtube.upload-path."
     }
   ]
 }

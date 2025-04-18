@@ -29,7 +29,8 @@ public class S3Integration {
                     s3Resource.contentType()
             );
         } catch (Exception ex) {
-            throw new RuntimeException("error downloading file from S3", ex);
+            log.error("Error downloading file from S3: {}", ex.getMessage(), ex);
+            throw new RuntimeException("Error downloading file from S3", ex);
         }
     }
 
@@ -37,7 +38,8 @@ public class S3Integration {
         try {
             this.s3Template.upload(bucket, key, content);
         } catch (Exception ex) {
-            throw new RuntimeException("error uploading file to S3", ex);
+            log.error("Error uploading file from S3: {}", ex.getMessage(), ex);
+            throw new RuntimeException("Error uploading file to S3", ex);
         }
     }
 
