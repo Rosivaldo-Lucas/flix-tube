@@ -91,10 +91,10 @@ public class VideoProcessingManager {
     }
 
     private Video createAndSaveVideo(VideoUploadedEventDTO eventDTO) {
-        String outputPath = String.format("%s/$%s", this.UPLOAD_PATH, eventDTO.transactionId());
+        String outputPath = String.format("%s/%s", this.UPLOAD_PATH, eventDTO.transactionId());
 
         Video video = new Video(
-                eventDTO.transactionId(), this.BUCKET, this.UPLOAD_PATH,
+                eventDTO.transactionId(), this.BUCKET, eventDTO.inputPath(),
                 outputPath, eventDTO.filename()
         );
 

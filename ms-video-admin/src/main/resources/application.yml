@@ -25,7 +25,7 @@ spring:
       max-request-size: 200MB
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/database-flixtube
+    url: jdbc:postgresql://postgres:5432/database-flixtube
     username: flixtube
     password: flixtube
   jpa:
@@ -40,7 +40,7 @@ spring:
     enabled: true
     default-schema: db_video_admin
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
     username: local
     password: local
@@ -63,5 +63,5 @@ spring:
         endpoint: ${AWS_S3_ENDPOINT:http://172.20.0.2:4566}
 
 flixtube:
-  bucket: videoencoder
+  bucket: flixtube
   upload-path: upload-video

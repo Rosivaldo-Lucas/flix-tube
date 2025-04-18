@@ -14,8 +14,8 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      AWS_ENDPOINT: http://172.20.0.2:4566
-      AWS_S3_ENDPOINT: http://172.20.0.2:4566
+      AWS_ENDPOINT: http://172.20.0.4:4566
+      AWS_S3_ENDPOINT: http://172.20.0.4:4566
     ports:
       - "8080:8080"
       - "5005:5005"
@@ -37,8 +37,8 @@ services:
         condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      AWS_ENDPOINT: http://172.18.0.2:4566
-      AWS_S3_ENDPOINT: http://172.18.0.2:4566
+      AWS_ENDPOINT: http://172.20.0.4:4566
+      AWS_S3_ENDPOINT: http://172.20.0.4:4566
     ports:
       - "8090:8090"
       - "5006:5006"

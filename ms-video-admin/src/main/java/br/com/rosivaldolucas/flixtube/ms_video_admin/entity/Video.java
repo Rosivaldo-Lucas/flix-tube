@@ -35,7 +35,7 @@ public class Video {
     @Column(name = "error")
     private String error;
 
-    @Column(name = "media_status", nullable = false)
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private VideoStatus status;
 

@@ -30,7 +30,7 @@ public class VideoService {
     private final S3Integration s3Integration;
     private final VideoUploadedProducer videoUploadedProducer;
 
-    public void create(CreateVideoRequest createVideoRequest) {
+    public Video create(CreateVideoRequest createVideoRequest) {
         Video video = Video.create(
                 createVideoRequest.getTitle(),
                 createVideoRequest.getDescription(),
@@ -45,6 +45,8 @@ public class VideoService {
 
         this.uploadVideo(video, createVideoRequest.getResource().getContent());
         this.sendVideoUploadedEvent(video);
+
+        return video;
     }
 
     public void updateVideoAfterProcessing(VideoProcessedEvent event) {
@@ -60,7 +62,7 @@ public class VideoService {
     }
 
     private void uploadVideo(Video video, byte[] content) {
-        String key = String.format("%s/%s/%s.mp4", this.UPLOAD_PATH, video.getId(), video.getFilename());
+        String key = String.format("%s/%s/%s", this.UPLOAD_PATH, video.getId(), video.getFilename());
 
         InputStream contentInputStream = new ByteArrayInputStream(content);
 
@@ -70,7 +72,7 @@ public class VideoService {
     private void sendVideoUploadedEvent(Video video) {
         String transactionId = video.getId();
         String inputPath = String.format("%s/%s", this.UPLOAD_PATH, video.getId());
-        String filename = String.format("%s.mp4", video.getFilename());
+        String filename = String.format("%s", video.getFilename());
 
         VideoUploadedEvent event = new VideoUploadedEvent(transactionId, inputPath, filename);
 

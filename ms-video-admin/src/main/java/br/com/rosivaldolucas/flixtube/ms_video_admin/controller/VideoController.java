@@ -1,10 +1,14 @@
 package br.com.rosivaldolucas.flixtube.ms_video_admin.controller;
 
 import br.com.rosivaldolucas.flixtube.ms_video_admin.controller.dto.CreateVideoRequest;
+import br.com.rosivaldolucas.flixtube.ms_video_admin.controller.dto.CreateVideoResponse;
+import br.com.rosivaldolucas.flixtube.ms_video_admin.entity.Video;
 import br.com.rosivaldolucas.flixtube.ms_video_admin.service.VideoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -19,10 +23,12 @@ public class VideoController {
     private final VideoService videoService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public void create(@RequestPart("data") @Valid CreateVideoRequest createVideoRequest, @RequestPart("file") MultipartFile videoFile) {
+    public ResponseEntity<CreateVideoResponse> create(@RequestPart("data") @Valid CreateVideoRequest createVideoRequest, @RequestPart("file") MultipartFile videoFile) {
         this.addResourceInRequest(createVideoRequest, videoFile);
 
-        this.videoService.create(createVideoRequest);
+        Video video = this.videoService.create(createVideoRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CreateVideoResponse(video.getId()));
     }
 
     private void addResourceInRequest(CreateVideoRequest createVideoRequest, MultipartFile videoFile) {
